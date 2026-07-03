@@ -23,8 +23,20 @@
       <view wx:if="{{item.type === 'system'}}" class="system-msg">
         <view class="badge">{{item.content}}</view>
       </view>
-      <view wx:elif="{{item.type === 'message'}}" class="message {{item.role === 'player' ? 'player' : 'ai'}}" id="msg-{{item.id}}">
-        <view class="avatar" style="background: {{item.role === 'player' ? 'linear-gradient(135deg, #2b4f8c, #1a3060)' : 'transparent'}}; border-color: {{item.color}};">
+      <view wx:elif="{{item.type === 'message' && item.role === 'player'}}" class="message player" id="msg-{{item.id}}">
+        <view class="bubble">
+          <view class="name-row">
+            <text class="name" style="color: {{item.color}};">{{item.name}}</text>
+          </view>
+          <view class="content">{{item.content}}</view>
+          <view class="time">{{item.time}}</view>
+        </view>
+        <view class="avatar" style="background: linear-gradient(135deg, #2b4f8c, #1a3060); border-color: var(--player-color);">
+          <text>{{item.emoji}}</text>
+        </view>
+      </view>
+      <view wx:elif="{{item.type === 'message' && item.role === 'ai'}}" class="message ai" id="msg-{{item.id}}">
+        <view class="avatar" style="background: transparent; border-color: {{item.color}};">
           <text>{{item.emoji}}</text>
         </view>
         <view class="bubble">

@@ -30,16 +30,16 @@ page {
   display: inline-block; padding: 4rpx 24rpx; border-radius: 20rpx;
   background: rgba(255,255,255,0.04); border: 1px solid var(--border);
 }
-.message { display: flex; gap: 16rpx; max-width: 88%; margin-bottom: 16rpx; }
-.message.player { flex-direction: row-reverse; justify-content: flex-start; margin-left: auto; max-width: 100%; }
-.message.ai { justify-content: flex-start; margin-right: auto; max-width: 100%; }
+.message { display: flex; gap: 16rpx; max-width: 80%; margin-bottom: 16rpx; }
+.message.player { flex-direction: row-reverse; justify-content: flex-start; margin-left: auto; }
+.message.ai { justify-content: flex-start; }
 .avatar {
   width: 80rpx; height: 80rpx; border-radius: 50%; display: flex; align-items: center;
   justify-content: center; font-size: 42rpx; flex-shrink: 0; border: 4rpx solid;
 }
 .message.player .avatar { background: linear-gradient(135deg, #2b4f8c, #1a3060) !important; border-color: var(--player-color) !important; }
 .bubble { padding: 16rpx 24rpx; border-radius: 24rpx; font-size: 26rpx; line-height: 1.6; word-break: break-word; }
-.message.player .bubble { background: linear-gradient(135deg, #1a5a3a, #0f4a2a); border: 1px solid #2a8a5a; border-bottom-right-radius: 8rpx; }
+.message.player .bubble { background: linear-gradient(135deg, #1a5a3a, #0f4a2a); border: 1px solid #2a8a5a; border-top-right-radius: 8rpx; border-bottom-right-radius: 8rpx; }
 .message.ai .bubble { background: var(--surface2); border: 1px solid var(--border); border-bottom-left-radius: 8rpx; }
 .name-row { display: flex; gap: 8rpx; margin-bottom: 6rpx; }
 .name { font-size: 22rpx; font-weight: 600; }
