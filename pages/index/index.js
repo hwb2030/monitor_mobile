@@ -1,139 +1,160 @@
-const CHARACTERS = require('../../utils/characters.js');
-const api = require('../../utils/api.js');
-
-Page({
-  data: {
-    characters: CHARACTERS,
-    messages: [],
-    inputValue: '',
-    isProcessing: false,
-    isAutoChatting: false,
-    showTyping: false,
-    scrollToId: 'bottom'
-  },
-
-  onLoad: function() {
-    this.addSystemMsg('?? »¶Ó­À´µ½ÁµÓëÉî¿Õ AI ÁÄÌìÈº£¡·¢ËÍÏûÏ¢»òµã»÷¡¸×Ô¶¯ÁÄÌì¡¹¿ªÊ¼~');
-  },
-
-  onInput: function(e) {
-    this.setData({ inputValue: e.detail.value });
-  },
-
-  onSend: function() {
-    const text = this.data.inputValue ? this.data.inputValue.trim() : '';
-    if (!text || this.data.isProcessing) return;
-    this.sendMessage(text);
-  },
-
-  sendMessage: async function(text) {
-    this.setData({ inputValue: '', isProcessing: true });
-    this.addPlayerMsg(text);
-    this.scrollToBottom();
-    await this.getAIReplies(text);
-    this.setData({ isProcessing: false });
-  },
-
-  addPlayerMsg: function(content) {
-    const time = this.getTime();
-    const msg = {
-      id: Date.now() + Math.random(),
-      type: 'message',
-      role: 'player',
-      name: '?? Íæ¼Ò',
-      emoji: '??',
-      content: content,
-      time: time
-    };
-    this.setData({ messages: [...this.data.messages, msg] });
-  },
-
-  addAIMsg: function(charId, content) {
-    const char = CHARACTERS.find(c => c.id === charId);
-    if (!char) return;
-    const time = this.getTime();
-    const msg = {
-      id: Date.now() + Math.random(),
-      type: 'message',
-      role: 'ai',
-      name: char.emoji + ' ' + char.name,
-      emoji: char.emoji,
-      color: char.color,
-      bgColor: char.bgColor,
-      content: content,
-      time: time
-    };
-    this.setData({ messages: [...this.data.messages, msg] });
-    this.scrollToBottom();
-  },
-
-  addSystemMsg: function(text) {
-    const msg = { id: Date.now(), type: 'system', content: text };
-    this.setData({ messages: [...this.data.messages, msg] });
-    this.scrollToBottom();
-  },
-
-  getAIReplies: async function(userText) {
-    this.setData({ showTyping: true });
-    this.scrollToBottom();
-    try {
-      const replies = await api.callChatAPI(userText);
-      this.setData({ showTyping: false });
-      if (replies && replies.length > 0) {
-        for (const reply of replies) {
-          await this.sleep(1000 + Math.random() * 2000);
-          this.addAIMsg(reply.charId, reply.content);
-        }
-      }
-    } catch (err) {
-      this.setData({ showTyping: false });
-      console.error('API error:', err);
-      this.addSystemMsg('?? ÍøÂç´íÎó£¬ÇëÉÔºóÖØÊÔ');
-    }
-  },
-
-  goToSettings: function() {
-    wx.navigateTo({ url: '/pages/settings/settings' });
-  },
-
-  autoChatTimer: null,
-
-  onAutoChat: function() {
-    if (this.data.isAutoChatting) {
-      this.setData({ isAutoChatting: false });
-      if (this.autoChatTimer) {
-        clearTimeout(this.autoChatTimer);
-        this.autoChatTimer = null;
-      }
-      return;
-    }
-    this.setData({ isAutoChatting: true });
-    this.autoChatLoop();
-  },
-
-  autoChatLoop: async function() {
-    if (!this.data.isAutoChatting) return;
-    this.sendMessage('ÈÃÎÒÃÇÁÄÁÄÌì°É~');
-    await this.sleep(5000 + Math.random() * 5000);
-    if (this.data.isAutoChatting) {
-      this.autoChatTimer = setTimeout(() => this.autoChatLoop(), 3000);
-    }
-  },
-
-  scrollToBottom: function() {
-    setTimeout(() => {
-      this.setData({ scrollToId: 'bottom' });
-    }, 100);
-  },
-
-  getTime: function() {
-    const d = new Date();
-    const h = String(d.getHours()).padStart(2, '0');
-    const m = String(d.getMinutes()).padStart(2, '0');
-    return h + ':' + m;
-  },
-
-  sleep: function(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-});
+const CHARACTERS = require('../../utils/characters.js');
+const api = require('../../utils/api.js');
+
+Page({
+  data: {
+    characters: CHARACTERS,
+    messages: [],
+    inputValue: '',
+    isProcessing: false,
+    isAutoChatting: false,
+    showTyping: false,
+    scrollToId: 'bottom'
+  },
+
+  onLoad: function() {
+    this.addSystemMsg('?? æ¬¢è¿Žæ¥åˆ°æ‹ä¸Žæ·±ç©º AI èŠå¤©ç¾¤ï¼å‘é€æ¶ˆæ¯æˆ–ç‚¹å‡»ã€Œè‡ªåŠ¨èŠå¤©ã€å¼€å§‹~');
+  },
+
+  onInput: function(e) {
+    this.setData({ inputValue: e.detail.value });
+  },
+
+  onSend: function() {
+    const text = this.data.inputValue ? this.data.inputValue.trim() : '';
+    if (!text || this.data.isProcessing) return;
+    this.sendMessage(text);
+  },
+
+  sendMessage: async function(text) {
+    this.setData({ inputValue: '', isProcessing: true });
+    this.addPlayerMsg(text);
+    this.scrollToBottom();
+    await this.getAIReplies(text);
+    this.setData({ isProcessing: false });
+  },
+
+  addPlayerMsg: function(content) {
+    const time = this.getTime();
+    const msg = {
+      id: Date.now() + Math.random(),
+      type: 'message',
+      role: 'player',
+      name: '?? çŽ©å®¶',
+      emoji: '??',
+      content: content,
+      time: time
+    };
+    this.setData({ messages: [...this.data.messages, msg] });
+  },
+
+  addAIMsg: function(charId, content) {
+    const char = CHARACTERS.find(c => c.id === charId);
+    if (!char) return;
+    const time = this.getTime();
+    const msg = {
+      id: Date.now() + Math.random(),
+      type: 'message',
+      role: 'ai',
+      name: char.emoji + ' ' + char.name,
+      emoji: char.emoji,
+      color: char.color,
+      bgColor: char.bgColor,
+      content: content,
+      time: time
+    };
+    this.setData({ messages: [...this.data.messages, msg] });
+    this.scrollToBottom();
+  },
+
+  addSystemMsg: function(text) {
+    const msg = { id: Date.now(), type: 'system', content: text };
+    this.setData({ messages: [...this.data.messages, msg] });
+    this.scrollToBottom();
+  },
+
+  getAIReplies: async function(userText) {
+    this.setData({ showTyping: true });
+    this.scrollToBottom();
+    try {
+      const replies = await api.callChatAPI(userText);
+      this.setData({ showTyping: false });
+      if (replies && replies.length > 0) {
+        for (const reply of replies) {
+          await this.sleep(1000 + Math.random() * 2000);
+          this.addAIMsg(reply.charId, reply.content);
+        }
+      }
+    } catch (err) {
+      this.setData({ showTyping: false });
+      console.error('API error:', err);
+      this.addSystemMsg('?? ç½‘ç»œé”™è¯¯ï¼Œè¯·ç¨åŽé‡è¯•');
+    }
+  },
+
+  goToSettings: function() {
+    wx.navigateTo({ url: '/pages/settings/settings' });
+  },
+
+  autoChatTimer: null,
+
+  onAutoChat: function() {
+    if (this.data.isAutoChatting) {
+      this.setData({ isAutoChatting: false });
+      if (this.autoChatTimer) {
+        clearTimeout(this.autoChatTimer);
+        this.autoChatTimer = null;
+      }
+      return;
+    }
+    this.setData({ isAutoChatting: true });
+    this.autoChatLoop();
+  },
+
+  autoChatLoop: async function() {
+    if (!this.data.isAutoChatting) return;
+    // AI agents auto-trigger conversation without player sending a message
+    const topics = ['å¤§å®¶ä»Šå¤©åœ¨åšä»€ä¹ˆå‘¢ï¼Ÿ', 'ä»Šå¤©å¤©æ°”çœŸå¥½å•Š~', 'ä½ ä»¬æœ‰ä»€ä¹ˆæœ‰è¶£çš„äº‹è¦åˆ†äº«å—ï¼Ÿ', 'æœ‰äººåœ¨å—ï¼Ÿæƒ³èŠèŠå¤©~'];
+    const topic = topics[Math.floor(Math.random() * topics.length)];
+    await this.triggerAutoAIChat(topic);
+    await this.sleep(8000 + Math.random() * 5000);
+    if (this.data.isAutoChatting) {
+      this.autoChatTimer = setTimeout(() => this.autoChatLoop(), 3000);
+    }
+  },
+
+  triggerAutoAIChat: async function(topic) {
+    this.setData({ showTyping: true });
+    this.scrollToBottom();
+    try {
+      const replies = await api.callChatAPI(topic);
+      this.setData({ showTyping: false });
+      if (replies && replies.length > 0) {
+        for (const reply of replies) {
+          await this.sleep(1000 + Math.random() * 2000);
+          this.addAIMsg(reply.charId, reply.content);
+        }
+      }
+    } catch (err) {
+      this.setData({ showTyping: false });
+      console.error('Auto chat API error:', err);
+    }
+  },
+
+  scrollToBottom: function() {
+    setTimeout(() => {
+      this.setData({ scrollToId: 'bottom' });
+    }, 100);
+  },
+
+  getTime: function() {
+    const d = new Date();
+    const h = String(d.getHours()).padStart(2, '0');
+    const m = String(d.getMinutes()).padStart(2, '0');
+    return h + ':' + m;
+  },
+
+  sleep: function(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+});
