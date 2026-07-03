@@ -1,15 +1,15 @@
 <view class="settings-page">
-  <view class="settings-title">?? ╫ги╚ Prompt иХ╤╗</view>
+  <view class="settings-title">Б ≥О╦▐ Х╖▓Х┴╡ Prompt Х╝╬Е╝ </view>
   <scroll-view class="char-tabs" scroll-x="true">
     <view wx:for="{{characters}}" wx:key="id" class="tab-item {{selectedCharId === item.id ? 'active' : ''}}"
       data-id="{{item.id}}" bindtap="selectChar" style="border-color: {{item.color}}; color: {{item.color}};">
       {{item.emoji}} {{item.name}}
     </view>
   </scroll-view>
-  <text class="label">╠Ю╪╜╫ги╚╣до╣мЁлАй╬╢йё╨</text>
+  <text class="label">Г╪√Х╬▒Х╖▓Х┴╡Г └ГЁ╩Г╩÷Ф▐░Г╓╨Х╞█О╪ </text>
   <textarea class="prompt-editor" value="{{promptText}}" bindinput="onPromptInput" maxlength="2000"></textarea>
   <view class="btn-row">
-    <button class="btn-save" bindtap="saveSettings">? ╠ё╢Ф</button>
-    <button class="btn-close" bindtap="closeSettings">? ╧ь╠у</button>
+    <button class="btn-save" bindtap="saveSettings">П÷▓╬ Д©²Е╜≤</button>
+    <button class="btn-close" bindtap="closeSettings">Б°∙ Е┘ЁИ≈╜</button>
   </view>
 </view>
