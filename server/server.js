@@ -45,7 +45,7 @@ app.post('/api/chat', async (req, res) => {
       try {
         if (!char || !char.id || !char.prompt) continue;
 
-        const systemPrompt = 'Äã½Ð' + char.name + '¡£' + char.prompt;
+        const systemPrompt = '??' + char.name + '?' + char.prompt;
 
         const response = await fetch(API_URL, {
           method: 'POST',
