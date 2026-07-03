@@ -20,7 +20,8 @@ app.get('/debug', (req, res) => {
     keyLength: API_KEY.length,
     keyPrefix: API_KEY.substring(0, 10),
     apiUrl: API_URL,
-    model: MODEL
+    model: MODEL,
+    nodeVersion: process.version
   });
 });
 
@@ -37,44 +38,61 @@ app.post('/api/chat', async (req, res) => {
 
     for (const char of shuffled) {
       try {
+        if (!char || !char.id || !char.prompt) {
+          console.error('Invalid char object:', JSON.stringify(char));
+          continue;
+        }
+
+        const systemPrompt = 'Äã½Ð' + char.name + '¡£' + char.prompt;
+        
+        const requestBody = {
+          model: MODEL,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: message }
+          ],
+          temperature: 0.85,
+          max_tokens: 300
+        };
+
+        console.log('Calling DeepSeek for ' + char.name);
+
         const response = await fetch(API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + API_KEY
           },
-          body: JSON.stringify({
-            model: MODEL,
-            messages: [
-              { role: 'system', content: char.prompt },
-              { role: 'user', content: message }
-            ],
-            temperature: 0.85,
-            max_tokens: 300
-          }),
+          body: JSON.stringify(requestBody),
           timeout: 30000
         });
 
         if (!response.ok) {
           const errBody = await response.text();
-          console.error('API error for ' + char.name + ': ' + response.status + ' ' + errBody);
+          console.error('DeepSeek error ' + response.status + ': ' + errBody);
           continue;
         }
 
         const data = await response.json();
-        const reply = data.choices?.[0]?.message?.content?.trim();
-        if (reply) {
-          replies.push({ charId: char.id, content: reply });
+        console.log('DeepSeek response choices count:', data.choices ? data.choices.length : 0);
+        
+        if (data.choices && data.choices.length > 0) {
+          const reply = data.choices[0].message && data.choices[0].message.content ? data.choices[0].message.content.trim() : '';
+          if (reply) {
+            replies.push({ charId: char.id, content: reply });
+          }
         }
       } catch (err) {
-        console.error('Error calling API for ' + char.name + ':', err.message);
+        console.error('Error for ' + (char ? char.name : 'unknown') + ':', err.message);
+        console.error('Stack:', err.stack);
       }
     }
 
-    res.json({ replies });
+    res.json({ replies: replies });
   } catch (err) {
-    console.error('Server error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Top-level error:', err.message);
+    console.error('Stack:', err.stack);
+    res.status(500).json({ error: 'Internal server error', detail: err.message });
   }
 });
 
