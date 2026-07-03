@@ -18,7 +18,7 @@ page {
   background: rgba(255,255,255,0.04); display: flex; align-items: center; gap: 6rpx;
 }
 .roster-dot { width: 12rpx; height: 12rpx; border-radius: 50%; flex-shrink: 0; }
-.chat-container { flex: 1; padding: 24rpx 30rpx; height: calc(100vh - 400rpx); }
+.chat-container { flex: 1; padding: 24rpx 30rpx; }
 .system-msg { text-align: center; font-size: 22rpx; color: var(--text2); padding: 8rpx 0; margin-bottom: 12rpx; }
 .badge {
   display: inline-block; padding: 4rpx 24rpx; border-radius: 20rpx;
@@ -45,14 +45,28 @@ page {
 .dot:nth-child(2) { animation-delay: 0.16s; }
 .dot:nth-child(3) { animation-delay: 0.32s; }
 @keyframes bounce { 0%, 80%, 100% { transform: scale(0.6); } 40% { transform: scale(1); } }
-.input-area { display: flex; gap: 12rpx; padding: 16rpx 24rpx; background: var(--surface); border-top: 1px solid var(--border); align-items: center; flex-shrink: 0; }
-.msg-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 16rpx; color: var(--text); padding: 16rpx 24rpx; font-size: 26rpx; min-height: 76rpx; }
-.send-btn { background: linear-gradient(135deg, var(--accent), #b8922a); border: none; color: #1a1a2e; padding: 16rpx 32rpx; border-radius: 16rpx; font-size: 24rpx; font-weight: 700; white-space: nowrap; height: 76rpx; line-height: 44rpx; }
-
+.input-area {
+  display: flex; gap: 10rpx; padding: 12rpx 16rpx; background: var(--surface);
+  border-top: 1px solid var(--border); align-items: center; flex-shrink: 0;
+  /* 悬浮于底部，更现代 */
+  box-shadow: 0 -4rpx 20rpx rgba(0,0,0,0.3);
+}
+.msg-input {
+  flex: 1; min-width: 0; /* 防止 flex 溢出 */
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20rpx; color: var(--text); padding: 14rpx 20rpx;
+  font-size: 26rpx; height: 72rpx; box-sizing: border-box;
+}
+.send-btn {
+  background: linear-gradient(135deg, var(--accent), #b8922a); border: none;
+  color: #1a1a2e; padding: 14rpx 24rpx; border-radius: 20rpx;
+  font-size: 24rpx; font-weight: 700; white-space: nowrap;
+  height: 72rpx; line-height: 44rpx; flex-shrink: 0;
+}
 .auto-btn {
   background: var(--surface2); border: 1px solid var(--border); color: var(--text);
-  padding: 16rpx 20rpx; border-radius: 16rpx; font-size: 20rpx; white-space: nowrap;
-  height: 76rpx; line-height: 44rpx; flex-shrink: 0;
+  padding: 14rpx 16rpx; border-radius: 20rpx; font-size: 20rpx; white-space: nowrap;
+  height: 72rpx; line-height: 44rpx; flex-shrink: 0;
 }
 .auto-btn.auto-active {
   background: rgba(212, 168, 74, 0.2); border-color: var(--accent); color: var(--accent);
