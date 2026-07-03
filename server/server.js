@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const fetch = require('node-fetch');
+const https = require('https');
 
 const app = express();
 app.use(cors());
@@ -12,6 +14,11 @@ app.get('/', (req, res) => {
 const API_KEY = process.env.DEEPSEEK_API_KEY || '';
 const API_URL = 'https://api.deepseek.com/v1/chat/completions';
 const MODEL = 'deepseek-v4-flash';
+
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  rejectUnauthorized: true
+});
 
 app.get('/debug', (req, res) => {
   res.json({
@@ -36,9 +43,7 @@ app.post('/api/chat', async (req, res) => {
 
     for (const char of shuffled) {
       try {
-        if (!char || !char.id || !char.prompt) {
-          continue;
-        }
+        if (!char || !char.id || !char.prompt) continue;
 
         const systemPrompt = 'Äã½Ð' + char.name + '¡£' + char.prompt;
 
@@ -57,7 +62,8 @@ app.post('/api/chat', async (req, res) => {
             temperature: 0.85,
             max_tokens: 300
           }),
-          signal: AbortSignal.timeout(30000)
+          agent: httpsAgent,
+          timeout: 30000
         });
 
         if (!response.ok) {
