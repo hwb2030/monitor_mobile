@@ -174,7 +174,7 @@ Page({
 
     } catch (err) {
 
-      this.setData({ showTyping: false });
+      this.setData({ showTyping: false, isProcessing: false });
 
       console.error('API error:', err);
 

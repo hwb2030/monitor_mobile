@@ -41,6 +41,7 @@
       <view class="dot"></view>
       <view class="dot"></view>
     </view>
+    <view id="bottom"></view>
   </scroll-view>
   <view class="input-area">
     <input class="msg-input" type="text" placeholder="输入消息..." value="{{inputValue}}" bindinput="onInput" bindconfirm="onSend" confirm-type="send" maxlength="200" />
