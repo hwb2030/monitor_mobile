@@ -1,4 +1,4 @@
-﻿const CHARACTERS = [
+const CHARACTERS = [
   {
     id: 'lishen',
     name: '黎深',
