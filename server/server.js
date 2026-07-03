@@ -14,6 +14,16 @@ const API_KEY = process.env.DEEPSEEK_API_KEY || '';
 const API_URL = 'https://api.deepseek.com/v1/chat/completions';
 const MODEL = 'deepseek-v4-flash';
 
+app.get('/debug', (req, res) => {
+  res.json({
+    hasApiKey: !!API_KEY,
+    keyLength: API_KEY.length,
+    keyPrefix: API_KEY.substring(0, 10),
+    apiUrl: API_URL,
+    model: MODEL
+  });
+});
+
 app.post('/api/chat', async (req, res) => {
   try {
     const { message, characters } = req.body;
@@ -46,7 +56,8 @@ app.post('/api/chat', async (req, res) => {
         });
 
         if (!response.ok) {
-          console.error('API error for ' + char.name + ': ' + response.status);
+          const errBody = await response.text();
+          console.error('API error for ' + char.name + ': ' + response.status + ' ' + errBody);
           continue;
         }
 
