@@ -1,4 +1,3 @@
-
 const CHARACTERS = require('../../utils/characters.js');
 const api = require('../../utils/api.js');
 
@@ -8,12 +7,13 @@ Page({
     messages: [],
     inputValue: '',
     isProcessing: false,
+    isAutoChatting: false,
     showTyping: false,
     scrollToId: 'bottom'
   },
 
   onLoad: function() {
-    this.addSystemMsg('\u{1f4ac} \u6b22\u8fce\u6765\u5230\u604b\u4e0e\u6df1\u7a7a AI \u804a\u5929\u7fa4\uff01\u53d1\u9001\u6d88\u606f\u6216\u70b9\u51fb\u300c\u81ea\u52a8\u804a\u5929\u300d\u5f00\u59cb~');
+    this.addSystemMsg('?? 欢迎来到恋与深空 AI 聊天群！发送消息或点击「自动聊天」开始~');
   },
 
   onInput: function(e) {
@@ -40,8 +40,8 @@ Page({
       id: Date.now() + Math.random(),
       type: 'message',
       role: 'player',
-      name: '\u{1f9d1} \u73a9\u5bb6',
-      emoji: '\u{1f9d1}',
+      name: '?? 玩家',
+      emoji: '??',
       content: content,
       time: time
     };
@@ -88,7 +88,35 @@ Page({
     } catch (err) {
       this.setData({ showTyping: false });
       console.error('API error:', err);
-      this.addSystemMsg('\u26a0\ufe0f \u7f51\u7edc\u9519\u8bef\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5');
+      this.addSystemMsg('?? 网络错误，请稍后重试');
+    }
+  },
+
+  goToSettings: function() {
+    wx.navigateTo({ url: '/pages/settings/settings' });
+  },
+
+  autoChatTimer: null,
+
+  onAutoChat: function() {
+    if (this.data.isAutoChatting) {
+      this.setData({ isAutoChatting: false });
+      if (this.autoChatTimer) {
+        clearTimeout(this.autoChatTimer);
+        this.autoChatTimer = null;
+      }
+      return;
+    }
+    this.setData({ isAutoChatting: true });
+    this.autoChatLoop();
+  },
+
+  autoChatLoop: async function() {
+    if (!this.data.isAutoChatting) return;
+    this.sendMessage('让我们聊聊天吧~');
+    await this.sleep(5000 + Math.random() * 5000);
+    if (this.data.isAutoChatting) {
+      this.autoChatTimer = setTimeout(() => this.autoChatLoop(), 3000);
     }
   },
 

@@ -48,3 +48,14 @@ page {
 .input-area { display: flex; gap: 12rpx; padding: 16rpx 24rpx; background: var(--surface); border-top: 1px solid var(--border); align-items: center; flex-shrink: 0; }
 .msg-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 16rpx; color: var(--text); padding: 16rpx 24rpx; font-size: 26rpx; min-height: 76rpx; }
 .send-btn { background: linear-gradient(135deg, var(--accent), #b8922a); border: none; color: #1a1a2e; padding: 16rpx 32rpx; border-radius: 16rpx; font-size: 24rpx; font-weight: 700; white-space: nowrap; height: 76rpx; line-height: 44rpx; }
+
+.auto-btn {
+  background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+  padding: 16rpx 20rpx; border-radius: 16rpx; font-size: 20rpx; white-space: nowrap;
+  height: 76rpx; line-height: 44rpx; flex-shrink: 0;
+}
+.auto-btn.auto-active {
+  background: rgba(212, 168, 74, 0.2); border-color: var(--accent); color: var(--accent);
+}
+.header-actions { margin-top: 8rpx; text-align: right; }
+.settings-link { font-size: 22rpx; color: var(--accent); opacity: 0.8; display: inline-block; padding: 4rpx 12rpx; }

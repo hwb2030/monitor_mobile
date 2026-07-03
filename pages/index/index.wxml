@@ -1,17 +1,20 @@
 <view class="container">
   <view class="header">
     <view class="header-title">
-      <text class="hl">æ‹</text>
-      <text>ä¸Ž</text>
-      <text class="hl">æ·±ç©º</text>
-      <text> Â· AI èŠå¤©ç¾¤</text>
+      <text class="hl">Áµ</text>
+      <text>Óë</text>
+      <text class="hl">Éî¿Õ</text>
+      <text> ¡¤ AI ÁÄÌìÈº</text>
     </view>
-    <view class="subtitle">äº”ä½ç”·ä¸»è§’å·²åœ¨çº¿ Â¯\_(ãƒ„)_/Â¯</view>
+    <view class="subtitle">ÎåÎ»ÄÐÖ÷½ÇÒÑÔÚÏß \_(¥Ä)_/</view>
     <view class="roster">
       <view wx:for="{{characters}}" wx:key="id" class="roster-item" style="border-color: {{item.color}};">
         <view class="roster-dot" style="background: {{item.color}};"></view>
         <text style="color: {{item.color}};">{{item.emoji}} {{item.name}}</text>
       </view>
+    </view>
+    <view class="header-actions">
+      <text class="settings-link" bindtap="goToSettings">?? ÉèÖÃ</text>
     </view>
   </view>
   <scroll-view class="chat-container" scroll-y="true" scroll-into-view="{{scrollToId}}" scroll-with-animation="true">
@@ -39,7 +42,8 @@
     </view>
   </scroll-view>
   <view class="input-area">
-    <input class="msg-input" type="text" placeholder="è¾“å…¥æ¶ˆæ¯..." value="{{inputValue}}" bindinput="onInput" bindconfirm="onSend" confirm-type="send" maxlength="200" />
-    <button class="send-btn" bindtap="onSend" disabled="{{not inputValue.trim()}}">å‘é€</button>
+    <input class="msg-input" type="text" placeholder="ÊäÈëÏûÏ¢..." value="{{inputValue}}" bindinput="onInput" bindconfirm="onSend" confirm-type="send" maxlength="200" />
+    <button class="send-btn" bindtap="onSend" disabled="{{!inputValue.trim()}}">·¢ËÍ</button>
+    <button class="auto-btn {{isAutoChatting ? 'auto-active' : ''}}" bindtap="onAutoChat">{{isAutoChatting ? '? Í£Ö¹' : '?? ×Ô¶¯ÁÄÌì'}}</button>
   </view>
 </view>
