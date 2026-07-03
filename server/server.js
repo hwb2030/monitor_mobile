@@ -31,7 +31,7 @@ app.post('/api/chat', async (req, res) => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${API_KEY}`
+            'Authorization': 'Bearer ' + API_KEY
           },
           body: JSON.stringify({
             model: MODEL,
@@ -46,7 +46,7 @@ app.post('/api/chat', async (req, res) => {
         });
 
         if (!response.ok) {
-          console.error(`API error for ${char.name}: ${response.status}`);
+          console.error('API error for ' + char.name + ': ' + response.status);
           continue;
         }
 
@@ -56,7 +56,7 @@ app.post('/api/chat', async (req, res) => {
           replies.push({ charId: char.id, content: reply });
         }
       } catch (err) {
-        console.error(`Error calling API for ${char.name}:`, err.message);
+        console.error('Error calling API for ' + char.name + ':', err.message);
       }
     }
 
@@ -69,6 +69,5 @@ app.post('/api/chat', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`DeepSeek proxy running on http://localhost:${PORT}`);
+  console.log('DeepSeek proxy running on http://localhost:' + PORT);
 });
-
