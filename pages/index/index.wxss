@@ -62,7 +62,7 @@ page {
   font-size: 28rpx; font-weight: 500; white-space: nowrap;
   height: 64rpx; line-height: 64rpx; flex-shrink: 0; text-align: center;
 }
-.send-btn[disabled] {
+.send-btn-disabled {
   opacity: 0.5;
 }
 .auto-btn {

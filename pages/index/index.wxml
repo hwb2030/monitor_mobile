@@ -44,6 +44,6 @@
   </scroll-view>
   <view class="input-area">
     <input class="msg-input" type="text" placeholder="输入消息..." value="{{inputValue}}" bindinput="onInput" bindconfirm="onSend" confirm-type="send" maxlength="200" />
-    <button class="send-btn" bindtap="onSend" disabled="{{!inputValue.trim()}}">发送</button>
+    <button class="send-btn {{inputValue.trim() ? '' : 'send-btn-disabled'}}" bindtap="onSend">发送</button>
   </view>
 </view>
