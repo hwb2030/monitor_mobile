@@ -1,0 +1,15 @@
+<view class="settings-page">
+  <view class="settings-title">⚙️ 角色 Prompt 设定</view>
+  <scroll-view class="char-tabs" scroll-x="true">
+    <view wx:for="{{characters}}" wx:key="id" class="tab-item {{selectedCharId === item.id ? 'active' : ''}}"
+      data-id="{{item.id}}" bindtap="selectChar" style="border-color: {{item.color}}; color: {{item.color}};">
+      {{item.emoji}} {{item.name}}
+    </view>
+  </scroll-view>
+  <text class="label">编辑角色的系统提示词：</text>
+  <textarea class="prompt-editor" value="{{promptText}}" bindinput="onPromptInput" maxlength="2000"></textarea>
+  <view class="btn-row">
+    <button class="btn-save" bindtap="saveSettings">✅ 保存</button>
+    <button class="btn-close" bindtap="closeSettings">✕ 关闭</button>
+  </view>
+</view>

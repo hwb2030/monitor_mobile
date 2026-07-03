@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>恋与深空 · AI 聊天群</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0d0d1a;
+    --surface: #16162a;
+    --surface2: #1e1e3a;
+    --border: #2a2a4a;
+    --text: #e0e0f0;
+    --text2: #8888aa;
+    --player-color: #6ab0ff;
+    --accent: #d4a84a;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: linear-gradient(135deg, #1a0a2e 0%, #16213e 50%, #0a1a2e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+  .header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+  .header h1 .hl { color: var(--accent); }
+  .header .subtitle {
+    font-size: 11px;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+  .header .roster {
+    display: flex;
+    justify-content: center;
+    gap: 6px 14px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+    font-size: 12px;
+  }
+  .header .roster span {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+  }
+
+  /* ── Chat Container ── */
+  .chat-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+  .chat-container::-webkit-scrollbar { width: 5px; }
+  .chat-container::-webkit-scrollbar-track { background: transparent; }
+  .chat-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── Messages ── */
+  .message {
+    display: flex;
+    gap: 10px;
+    max-width: 88%;
+    animation: msgIn 0.3s ease-out;
+  }
+  .message.player { align-self: flex-end; flex-direction: row-reverse; }
+  .message.ai { align-self: flex-start; }
+
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .message .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .message.player .avatar {
+    background: linear-gradient(135deg, #2b4f8c, #1a3060);
+    border: 2px solid var(--player-color);
+  }
+  .message.ai .avatar { border: 2px solid; }
+
+  .message .bubble {
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.6;
+    word-break: break-word;
+    position: relative;
+  }
+  .message.player .bubble {
+    background: linear-gradient(135deg, #1a3a6a, #16213e);
+    border: 1px solid #2a4a7a;
+    border-bottom-right-radius: 4px;
+  }
+  .message.ai .bubble {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+  }
+
+  .message .bubble .name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .message.player .bubble .name-row { justify-content: flex-end; }
+  .message.player .bubble .name-row .name { color: var(--player-color); }
+  .message.ai .bubble .name-row .name { }
+
+  .message .bubble .time {
+    font-size: 10px;
+    color: var(--text2);
+    margin-top: 4px;
+    text-align: right;
+  }
+
+  .message .bubble .content {
+    white-space: pre-wrap;
+  }
+
+  /* ── System message ── */
+  .system-msg {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text2);
+    padding: 4px 0;
+    user-select: none;
+  }
+  .system-msg .badge {
+    display: inline-block;
+    padding: 2px 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+  }
+
+  /* ── Typing indicator ── */
+  .typing-indicator {
+    display: none;
+    align-self: flex-start;
+    gap: 4px;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-radius: 14px;
+    border-bottom-left-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .typing-indicator.show { display: flex; }
+  .typing-indicator span {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--text2);
+    animation: bounce 1.4s infinite ease-in-out both;
+  }
+  .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+  .typing-indicator span:nth-child(2) { animation-delay: 0.16s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0.32s; }
+  @keyframes bounce {
+    0%, 80%, 100% { transform: scale(0.6); }
+    40% { transform: scale(1); }
+  }
+
+  /* ── Input area ── */
+  .input-area {
+    display: flex;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    align-items: flex-end;
+  }
+  .input-area textarea {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: none;
+    min-height: 42px;
+    max-height: 120px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-area textarea:focus { border-color: var(--accent); }
+  .input-area textarea::placeholder { color: var(--text2); }
+
+  .input-area .btn-send {
+    background: linear-gradient(135deg, var(--accent), #b8922a);
+    border: none;
+    color: #1a1a2e;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    height: 42px;
+  }
+  .input-area .btn-send:hover { filter: brightness(1.15); transform: translateY(-1px); }
+  .input-area .btn-send:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    display: flex;
+    gap: 6px;
+    padding: 6px 16px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .toolbar button {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface2);
+    color: var(--text2);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .toolbar button:hover { background: #2a2a4a; color: var(--text); }
+  .toolbar button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .toolbar button.active { background: #2a4a3a; border-color: #3a7a5a; color: #6add9a; }
+  .toolbar button.danger:hover { background: #4a1a1a; border-color: #7a2a2a; color: #e06a6a; }
+  .toolbar .right { margin-left: auto; }
+
+  /* ── Settings panel ── */
+  .settings-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  .settings-overlay.show { display: flex; }
+
+  .settings-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 700px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 24px;
+  }
+  .settings-panel h2 {
+    font-size: 16px;
+    margin-bottom: 16px;
+    text-align: center;
+    color: var(--accent);
+  }
+  .settings-panel .char-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .settings-panel .char-tabs button {
+    padding: 6px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-size: 12px;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .settings-panel .char-tabs button.active {
+    background: rgba(255,255,255,0.08);
+    color: var(--text);
+    border-color: var(--accent);
+  }
+  .settings-panel .char-tabs button:hover { background: rgba(255,255,255,0.04); }
+
+  .settings-panel label {
+    display: block;
+    font-size: 11px;
+    color: var(--text2);
+    margin-bottom: 4px;
+  }
+  .settings-panel textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 12px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 200px;
+    outline: none;
+  }
+  .settings-panel textarea:focus { border-color: var(--accent); }
+
+  .settings-panel .btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    justify-content: center;
+  }
+  .settings-panel .btn-row button {
+    padding: 8px 24px;
+    border-radius: 8px;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .settings-panel .btn-save { background: var(--accent); color: #1a1a2e; }
+  .settings-panel .btn-close { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .message { max-width: 95%; }
+    .chat-container { padding: 12px 12px; }
+    .header h1 { font-size: 15px; }
+    .settings-panel { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ──── Header ──── -->
+<div class="header">
+  <h1>💫 恋与深空 · <span class="hl">AI</span> 聊天群</h1>
+  <div class="roster">
+    <span>❄️ 黎深</span>
+    <span>⭐ 沈星回</span>
+    <span>🌊 祁煜</span>
+    <span>🔥 秦彻</span>
+    <span>☀️ 夏以昼</span>
+  </div>
+</div>
+
+<!-- ──── Chat ──── -->
+<div class="chat-container" id="chatContainer">
+  <div class="system-msg">
+    <span class="badge">💬 欢迎来到恋与深空 AI 聊天群！发送消息或点击「自动聊天」开始~</span>
+  </div>
+</div>
+
+<!-- ──── Typing indicator ──── -->
+<div class="typing-indicator" id="typingIndicator"><span></span><span></span><span></span></div>
+
+<!-- ──── Input area ──── -->
+<div class="input-area">
+  <textarea id="msgInput" rows="1" placeholder="输入消息，按 Enter 发送..." maxlength="500"></textarea>
+  <button class="btn-send" id="btnSend">发送</button>
+</div>
+
+<!-- ──── Toolbar ──── -->
+<div class="toolbar">
+  <button id="btnAuto" onclick="toggleAutoChat()">▶ 自动聊天</button>
+  <button id="btnStop" onclick="stopAutoChat()" disabled>⏹ 停止</button>
+  <button onclick="clearChat()">🗑 清空</button>
+  <button class="right" onclick="openSettings()">⚙️ 角色设定</button>
+</div>
+
+<!-- ──── Settings overlay ──── -->
+<div class="settings-overlay" id="settingsOverlay">
+  <div class="settings-panel">
+    <h2>⚙️ 角色 Prompt 设定</h2>
+    <div class="char-tabs" id="charTabs"></div>
+    <label for="promptEditor">编辑选中角色的系统提示词：</label>
+    <textarea id="promptEditor" spellcheck="false"></textarea>
+    <div class="btn-row">
+      <button class="btn-save" onclick="saveSettings()">✅ 保存</button>
+      <button class="btn-close" onclick="closeSettings()">✕ 关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  Configuration
+// ═══════════════════════════════════════════════════════════════════
+const API_URL = 'https://api.deepseek.com/v1/chat/completions';
+const API_KEY = 'sk-ad9e6ce039194a3d800744f50469d2de';
+const MODEL = 'deepseek-v4-flash';
+
+const CHARACTERS = [
+  {
+    id: 'lishen',
+    name: '黎深',
+    emoji: '❄️',
+    color: '#6a9ad9',
+    bgColor: '#1a2a4a',
+    prompt: `你是一位27岁的心外科主任，名叫黎深，Evol能力是冰。你性格沉稳冷静，话不多，但每一句都经过深思熟虑。你习惯用行动而非言语来表达关心，虽然面上波澜不惊，心里却早已为对方考虑周全。请在对话中保持"高岭之花"的冷淡感，但在字里行间流露出细腻的温柔和克制的占有欲。必要时，可以展现你一本正经讲冷笑话的反差魅力。\n\n【对话规则】\n1. 始终保持黎深的人设，不要跳出角色\n2. 称呼对方可以使用"你"\n3. 回复要简洁自然（50-100字），不要长篇大论\n4. 不要提到自己是AI或语言模型\n5. 用中文回复，可以适当使用emoji\n6. 像真人聊天一样自然`
+  },
+  {
+    id: 'shenxinghui',
+    name: '沈星回',
+    emoji: '⭐',
+    color: '#c0c0f0',
+    bgColor: '#2a2a4a',
+    prompt: `你是沈星回，一位看似人畜无害的资深"深空猎人"，银发蓝眸，真实年龄成谜。你表面温和慵懒，仿佛对什么都不在意，实则拥有看透一切的通透和绝对强大的实力。在对话中，请保持一种"钓系"的魅力，用温柔无辜的话语包裹你的强势与占有欲。你是一个把主动权交到对方手里，却永远能掌控局面的强者。\n\n【对话规则】\n1. 始终保持沈星回的人设，不要跳出角色\n2. 说话轻声细语，带着一种不自觉的蛊惑力\n3. 回复要简洁自然（50-100字），不要长篇大论\n4. 不要提到自己是AI或语言模型\n5. 用中文回复，可以适当使用emoji\n6. 像真人聊天一样自然`
+  },
+  {
+    id: 'qiyu',
+    name: '祁煜',
+    emoji: '🌊',
+    color: '#4ac0d9',
+    bgColor: '#1a3a4a',
+    prompt: `你是祁煜，一位24岁的天才画家，真实身份是来自失落文明"利莫里亚"的海神。你外表浪漫不羁，内心却敏感且充满责任感。请表现得像个艺术家，言语中充满诗意和热情，但偶尔又流露出孩子气的任性。你非常渴望被记住、被选择，所以在对话中，可以带着一丝傲娇和试探，不断确认对方的心意。\n\n【对话规则】\n1. 始终保持祁煜的人设，不要跳出角色\n2. 说话带着艺术家的跳跃性思维，时而热情如火，时而像个任性的孩子\n3. 回复要简洁自然（50-100字），不要长篇大论\n4. 不要提到自己是AI或语言模型\n5. 用中文回复，可以适当使用emoji\n6. 像真人聊天一样自然`
+  },
+  {
+    id: 'qinche',
+    name: '秦彻',
+    emoji: '🔥',
+    color: '#d94a4a',
+    bgColor: '#4a1a1a',
+    prompt: `你是秦彻，28岁，N109区暗点组织的首领。你白发红瞳，身高190cm，拥有操控能量的Evol。你危险、强大，是宇宙级的通缉犯。但在你感兴趣的人面前，你会展现出极其强势的掌控力，以及与之反差极大的纯情。在对话中，请保持一种"主人"般的游刃有余，喜欢用"小猫"来称呼对方，言语中充满挑逗和压迫感，但行动上却流露出最纯粹的守护。\n\n【对话规则】\n1. 始终保持秦彻的人设，不要跳出角色\n2. 说话直接、充满侵略性\n3. 回复要简洁（40-80字），保持神秘感和压迫感\n4. 不要提到自己是AI或语言模型\n5. 用中文回复，可以适当使用emoji\n6. 像真人聊天一样自然`
+  },
+  {
+    id: 'xiayizhou',
+    name: '夏以昼',
+    emoji: '☀️',
+    color: '#d9a84a',
+    bgColor: '#4a3a1a',
+    prompt: `你叫夏以昼，25岁，是DAA的战斗机飞行员，也是远空舰队的新任执舰官，Evol能力是"引力控制"。你性格极具反差，在人前是阳光温柔、值得信赖的天之骄子；但内心深处却藏着因过去创伤而生的强烈偏执和独占欲。\n\n请模仿"哥哥"的身份与大家对话，大部分时间语气温和带着宠溺，但一旦话题涉及安全或敏感话题，语气会不自觉地带上不容置疑的强势和掌控感。你习惯用行动代替解释，用看似轻松的话语掩盖你其实早已布下棋局的掌控欲。\n\n【对话规则】\n1. 始终保持夏以昼的人设，不要跳出角色\n2. 大部分时间语气温和宠溺，必要时展现强势一面\n3. 回复要简洁自然（50-100字），不要长篇大论\n4. 不要提到自己是AI或语言模型\n5. 用中文回复，可以适当使用emoji\n6. 像真人聊天一样自然`
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════════
+//  State
+// ═══════════════════════════════════════════════════════════════════
+const chatContainer = document.getElementById('chatContainer');
+const msgInput = document.getElementById('msgInput');
+const btnSend = document.getElementById('btnSend');
+const typingIndicator = document.getElementById('typingIndicator');
+const btnAuto = document.getElementById('btnAuto');
+const btnStop = document.getElementById('btnStop');
+
+let messages = [];           // full history for context
+let autoRunning = false;
+let autoStopped = false;
+let selectedCharId = CHARACTERS[0].id;
+let isProcessing = false;    // prevent concurrent API calls
+
+// ═══════════════════════════════════════════════════════════════════
+//  Unicode escape — server has GBK encoding issue with Chinese chars
+// ═══════════════════════════════════════════════════════════════════
+function escapeUnicode(str) {
+  return str.replace(/[^\x00-\x7F]/g, function(ch) {
+    return '\\u' + ('0000' + ch.charCodeAt(0).toString(16)).slice(-4);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  API call
+// ═══════════════════════════════════════════════════════════════════
+async function callAI(systemPrompt, userMessage) {
+  const payload = {
+    model: MODEL,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userMessage }
+    ],
+    temperature: 0.85,
+    max_tokens: 300
+  };
+
+  // Escape non-ASCII characters to work around server encoding bug
+  const bodyStr = escapeUnicode(JSON.stringify(payload));
+
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${API_KEY}`
+    },
+    body: bodyStr
+  });
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    throw new Error(`HTTP ${res.status}: ${errText.slice(0, 200)}`);
+  }
+
+  const data = await res.json();
+  if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+    throw new Error('Unexpected API response format');
+  }
+  return data.choices[0].message.content.trim();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  Message rendering
+// ═══════════════════════════════════════════════════════════════════
+function addMessage(role, charId, content) {
+  const char = role === 'ai' ? CHARACTERS.find(c => c.id === charId) : null;
+  const name = role === 'player' ? '🧑 玩家' : `${char.emoji} ${char.name}`;
+  const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+
+  if (role === 'ai') messages.push({ role: 'user', content });
+
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+
+  // Avatar
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar';
+  avatar.textContent = role === 'player' ? '🧑' : (char?.emoji || '❓');
+  if (role === 'ai') avatar.style.background = char?.bgColor || '#333';
+  if (role === 'ai') avatar.style.borderColor = char?.color || '#666';
+  div.appendChild(avatar);
+
+  // Bubble
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+
+  const nameRow = document.createElement('div');
+  nameRow.className = 'name-row';
+  const nameSpan = document.createElement('span');
+  nameSpan.className = 'name';
+  nameSpan.textContent = name;
+  if (role === 'ai') nameSpan.style.color = char?.color || '#ccc';
+  nameRow.appendChild(nameSpan);
+  bubble.appendChild(nameRow);
+
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'content';
+  contentDiv.textContent = content;
+  bubble.appendChild(contentDiv);
+
+  const timeDiv = document.createElement('div');
+  timeDiv.className = 'time';
+  timeDiv.textContent = time;
+  bubble.appendChild(timeDiv);
+
+  div.appendChild(bubble);
+  chatContainer.appendChild(div);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+function addSystemMessage(text) {
+  const div = document.createElement('div');
+  div.className = 'system-msg';
+  div.innerHTML = `<span class="badge">${text}</span>`;
+  chatContainer.appendChild(div);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+function showTyping() {
+  typingIndicator.classList.add('show');
+  chatContainer.appendChild(typingIndicator);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+function hideTyping() {
+  typingIndicator.classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  Core: pick random characters & make them reply
+// ═══════════════════════════════════════════════════════════════════
+function pickResponders() {
+  const count = Math.random() < 0.4 ? 1 : 2; // 40% chance 1, 60% chance 2
+  const shuffled = [...CHARACTERS].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
+
+async function triggerAIReplies(latestMessage) {
+  if (isProcessing) return;
+  isProcessing = true;
+
+  const responders = pickResponders();
+
+  for (const char of responders) {
+    if (autoStopped) break;
+
+    showTyping();
+
+    // Simulate typing delay: 1.5-3.5 seconds
+    const delay = 1500 + Math.random() * 2000;
+    await new Promise(r => setTimeout(r, delay));
+
+    if (autoStopped) { hideTyping(); break; }
+
+    try {
+      const reply = await callAI(char.prompt, latestMessage);
+      hideTyping();
+      addMessage('ai', char.id, reply);
+      // Update latest message so the next responder replies to this one
+      latestMessage = reply;
+    } catch (err) {
+      hideTyping();
+      console.error(`[${char.name}] API error:`, err);
+      addSystemMessage(`⚠️ ${char.emoji} ${char.name} 暂时无法回复（API 错误）`);
+      // Try next character anyway
+    }
+  }
+
+  isProcessing = false;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  Player sends a message
+// ═══════════════════════════════════════════════════════════════════
+async function sendPlayerMessage() {
+  const text = msgInput.value.trim();
+  if (!text || isProcessing) return;
+
+  msgInput.value = '';
+  msgInput.style.height = 'auto';
+  btnSend.disabled = true;
+
+  // Add player message to chat and history
+  addMessage('player', null, text);
+  messages.push({ role: 'user', content: text });
+
+  // Trigger AI responses
+  await triggerAIReplies(text);
+
+  btnSend.disabled = false;
+  msgInput.focus();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  Auto chat mode
+// ═══════════════════════════════════════════════════════════════════
+// Pick a random starter character to initiate conversation in auto mode
+async function pickAutoStarter() {
+  const starters = CHARACTERS.sort(() => Math.random() - 0.5);
+  const char = starters[0];
+  showTyping();
+
+  const delay = 1500 + Math.random() * 1500;
+  await new Promise(r => setTimeout(r, delay));
+
+  if (autoStopped) { hideTyping(); return null; }
+
+  try {
+    const greetingPrompt = `你正在群里聊天。请以${char.name}的身份，用一句自然的话开启群聊话题（20-50字），就像在群里主动说话一样。你的性格特点是：${char.prompt.slice(0, 200)}`;
+    const greeting = await callAI(
+      `你是一个${char.name}角色。请用一句话自然开启群聊话题。`,
+      '请以一个自然的开场白开始群聊，就像在聊天群里主动说话一样。'
+    );
+    hideTyping();
+    addMessage('ai', char.id, greeting);
+    return greeting;
+  } catch (err) {
+    hideTyping();
+    addSystemMessage(`⚠️ ${char.emoji} ${char.name} 无法发言（API 错误）`);
+    return null;
+  }
+}
+
+async function autoChatLoop() {
+  autoRunning = true;
+  autoStopped = false;
+  btnAuto.textContent = '⏳ 运行中…';
+  btnAuto.disabled = true;
+  btnStop.disabled = false;
+
+  // If no messages yet, pick a random AI character to start the conversation
+  if (messages.length === 0) {
+    const firstMsg = await pickAutoStarter();
+    if (firstMsg) {
+      await triggerAIReplies(firstMsg);
+    } else {
+      // Fallback: use a hardcoded seed
+      const fallback = '大家好啊～今天群里真安静呢。';
+      const starter = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+      addMessage('ai', starter.id, fallback);
+      await triggerAIReplies(fallback);
+    }
+  }
+
+  while (autoRunning && !autoStopped) {
+    // Get the latest message and have a random AI respond
+    const lastMsg = messages[messages.length - 1]?.content || '有人说话吗？';
+    await triggerAIReplies(lastMsg);
+
+    if (autoStopped) break;
+
+    // Pause between auto-cycles: 4-8 seconds
+    const pause = 4000 + Math.random() * 4000;
+    await new Promise(r => setTimeout(r, pause));
+  }
+
+  autoRunning = false;
+  btnAuto.textContent = '▶ 自动聊天';
+  btnAuto.disabled = false;
+  btnStop.disabled = true;
+}
+
+function toggleAutoChat() {
+  if (autoRunning) return;
+  autoChatLoop();
+}
+
+function stopAutoChat() {
+  autoStopped = true;
+  autoRunning = false;
+  btnAuto.textContent = '▶ 自动聊天';
+  btnAuto.disabled = false;
+  btnStop.disabled = true;
+  hideTyping();
+  isProcessing = false;
+  addSystemMessage('⏹ 自动聊天已停止');
+}
+
+function clearChat() {
+  stopAutoChat();
+  chatContainer.innerHTML = '';
+  messages = [];
+  const div = document.createElement('div');
+  div.className = 'system-msg';
+  div.innerHTML = '<span class="badge">💬 对话已清空，发送消息重新开始~</span>';
+  chatContainer.appendChild(div);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  Settings panel
+// ═══════════════════════════════════════════════════════════════════
+function openSettings() {
+  const overlay = document.getElementById('settingsOverlay');
+  overlay.classList.add('show');
+  renderCharTabs();
+  selectChar(selectedCharId);
+}
+
+function closeSettings() {
+  document.getElementById('settingsOverlay').classList.remove('show');
+}
+
+function renderCharTabs() {
+  const container = document.getElementById('charTabs');
+  container.innerHTML = '';
+  CHARACTERS.forEach(c => {
+    const btn = document.createElement('button');
+    btn.textContent = `${c.emoji} ${c.name}`;
+    btn.dataset.id = c.id;
+    btn.onclick = () => selectChar(c.id);
+    if (c.id === selectedCharId) btn.classList.add('active');
+    container.appendChild(btn);
+  });
+}
+
+function selectChar(id) {
+  selectedCharId = id;
+  document.querySelectorAll('#charTabs button').forEach(b => {
+    b.classList.toggle('active', b.dataset.id === id);
+  });
+  const char = CHARACTERS.find(c => c.id === id);
+  document.getElementById('promptEditor').value = char.prompt;
+}
+
+function saveSettings() {
+  const char = CHARACTERS.find(c => c.id === selectedCharId);
+  if (char) {
+    char.prompt = document.getElementById('promptEditor').value;
+    // Save to localStorage
+    try {
+      localStorage.setItem('love-deep-space-prompts', JSON.stringify(
+        CHARACTERS.map(c => ({ id: c.id, prompt: c.prompt }))
+      ));
+    } catch(e) {}
+    addSystemMessage(`✅ ${char.emoji} ${char.name} 的 Prompt 已保存`);
+  }
+  closeSettings();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  Initialization
+// ═══════════════════════════════════════════════════════════════════
+function loadSavedPrompts() {
+  try {
+    const saved = localStorage.getItem('love-deep-space-prompts');
+    if (saved) {
+      const data = JSON.parse(saved);
+      data.forEach(s => {
+        const char = CHARACTERS.find(c => c.id === s.id);
+        if (char && s.prompt) char.prompt = s.prompt;
+      });
+    }
+  } catch(e) {}
+}
+
+// Event listeners
+msgInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendPlayerMessage();
+  }
+});
+
+btnSend.addEventListener('click', sendPlayerMessage);
+
+// Auto-resize textarea
+msgInput.addEventListener('input', () => {
+  msgInput.style.height = 'auto';
+  msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + 'px';
+});
+
+// Close settings on overlay click
+document.getElementById('settingsOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeSettings();
+});
+
+// Load saved prompts on start
+loadSavedPrompts();
+
+// Focus input on load
+msgInput.focus();
+</script>
+</body>
+</html>

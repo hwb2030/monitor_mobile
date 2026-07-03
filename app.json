@@ -1,0 +1,14 @@
+﻿{
+  "pages": [
+    "pages/index/index",
+    "pages/settings/settings"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#0d0d1a",
+    "navigationBarTitleText": "恋与深空 · AI 聊天群",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#0d0d1a"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}
