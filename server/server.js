@@ -1,3 +1,4 @@
+const GIT_COMMIT = 'de47ccc';
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
@@ -67,7 +68,7 @@ app.post('/api/chat', async (req, res) => {
         });
 
         if (!response.ok) {
-          const errBody = await response.text();
+          const errBody = await response.json();
           console.error('DeepSeek error ' + response.status + ': ' + errBody);
           continue;
         }
@@ -95,3 +96,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log('DeepSeek proxy running on http://localhost:' + PORT);
 });
+
+
