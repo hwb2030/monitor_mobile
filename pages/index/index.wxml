@@ -14,6 +14,7 @@
       </view>
     </view>
     <view class="header-actions">
+      <button class="auto-btn-header {{isAutoChatting ? 'auto-active-header' : ''}}" bindtap="onAutoChat">{{isAutoChatting ? '⏹ 停止' : '▶ 自动聊天'}}</button>
       <text class="settings-link" bindtap="goToSettings">⚙️ 设置</text>
     </view>
   </view>
@@ -44,6 +45,5 @@
   <view class="input-area">
     <input class="msg-input" type="text" placeholder="输入消息..." value="{{inputValue}}" bindinput="onInput" bindconfirm="onSend" confirm-type="send" maxlength="200" />
     <button class="send-btn" bindtap="onSend" disabled="{{!inputValue.trim()}}">发送</button>
-    <button class="auto-btn {{isAutoChatting ? 'auto-active' : ''}}" bindtap="onAutoChat">{{isAutoChatting ? '⏹ 停止' : '▶ 自动聊天'}}</button>
   </view>
 </view>

@@ -28,7 +28,7 @@ Page({
 
   onLoad: function() {
 
-    this.addSystemMsg('💬 欢迎来到恋与深空 AI 聊天群！发送消息或点击「自动聊天」开始~');
+    this.addSystemMsg('💬 欢迎来到恋与深空 AI 聊天群！发送消息或点击顶部「自动聊天」开始~');
 
   },
 
