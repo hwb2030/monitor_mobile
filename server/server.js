@@ -6,6 +6,10 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', service: 'DeepSeek proxy', version: '1.0.0' });
+});
+
 const API_KEY = process.env.DEEPSEEK_API_KEY || '';
 const API_URL = 'https://api.deepseek.com/v1/chat/completions';
 const MODEL = 'deepseek-v4-flash';
@@ -67,3 +71,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`DeepSeek proxy running on http://localhost:${PORT}`);
 });
+
