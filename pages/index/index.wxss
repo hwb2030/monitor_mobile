@@ -31,7 +31,7 @@ page {
   background: rgba(255,255,255,0.04); border: 1px solid var(--border);
 }
 .message { display: flex; gap: 16rpx; max-width: 80%; margin-bottom: 16rpx; }
-.message.player { flex-direction: row; justify-content: flex-end; align-self: flex-end; }
+.message.player { flex-direction: row; justify-content: flex-end; margin-left: 20%; }
 .message.ai { justify-content: flex-start; align-self: flex-start; }
 .avatar {
   width: 80rpx; height: 80rpx; border-radius: 50%; display: flex; align-items: center;
